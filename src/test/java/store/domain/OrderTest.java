@@ -6,6 +6,9 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.ValueSources;
 import store.error.ErrorMessage;
 
 public class OrderTest {
@@ -13,30 +16,18 @@ public class OrderTest {
 
     @Test
     void 주문_생성_테스트() {
-        //given
         String productName = "사이다";
-        String orderCount = "1";
-        LocalDate createdDate = LocalDate.now();
-        //when
-        Order order = new Order(productName, orderCount, createdDate);
-        int parseIntOrderCount = Integer.parseInt(orderCount);
-        //then
+        Order order = new Order(productName, "1");
         assertThat(order.getProductName())
                 .as("기대값 {사이다}와 현재값 {%s}가 일치하지 않습니다.", productName)
                 .isEqualTo("사이다");
-        assertThat(order.getOrderCount()).isEqualTo(parseIntOrderCount);
-        assertThat(order.getCreatedDate()).isEqualTo(createdDate);
     }
 
-    @Test
-    void 주문_생성_실패_테스트() {
-        // given
-        String productName = "사이다";
-        String orderCount = "a";
-        LocalDate createdDate = LocalDate.now();
+    @ParameterizedTest
+    @ValueSource(strings = {"", " ", "a"})
+    void 주문_생성_실패_테스트(String element) {
 
-        //then
-        assertThatIllegalArgumentException().isThrownBy(() -> new Order(productName, orderCount, createdDate))
+        assertThatIllegalArgumentException().isThrownBy(() -> new Order("사이다", element))
                 .withMessage(ErrorMessage.INPUT_ERROR_MESSAGE.getErrorMessage());
     }
 }
