@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import store.error.ErrorMessage;
 
 public class Product {
-    private static final int INVALID_STOCK = -1;
+    private static final int INSUFFICIENT_STOCK = -1;
     private final String productName;
     private final int productPrice;
     private int productStock;
@@ -21,28 +21,9 @@ public class Product {
         this.promotionType = PromotionType.from(promotionType);
     }
 
-    public String getProductName() {
-        return productName;
-    }
-
-    public int getProductPrice() {
-        return productPrice;
-    }
-
-    public int getProductStock() {
-        return productStock;
-    }
-
-    public PromotionType getPromotionType() {
-        return promotionType;
-    }
-
-    public boolean checkPromotionDuration(Order order) {
-        LocalDate orderDate = order.getCreatedDate();
-        if (promotionType.isPromotionDuration(orderDate)) {
-            return true;
-        }
-        return false;
+    // 주문 수량과 재고 비교
+    public boolean productStockCompareOrderQuantity(int orderCount) {
+        return Integer.compare(productStock, orderCount) != INSUFFICIENT_STOCK;
     }
 
     public boolean checkOrderProductName(Order order) {
@@ -73,6 +54,32 @@ public class Product {
 
     @Override
     public String toString() {
-        return String.format("- %s %,d원 %d개 %s", productName, productPrice, productStock, promotionType.printPromotionType().trim());
+        return String.format("- %s %,d원 %d개 %s", productName, productPrice, productStock,
+                promotionType.printPromotionType().trim());
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public int getProductPrice() {
+        return productPrice;
+    }
+
+    public int getProductStock() {
+        return productStock;
+    }
+
+    public PromotionType getPromotionType() {
+        return promotionType;
+    }
+
+    public boolean checkPromotionDuration(Order order) {
+        LocalDate orderDate = order.getCreatedDate();
+        return promotionType.isPromotionDuration(orderDate);
+    }
+
+    public int getPromotionUnitCount() {
+        return promotionType.getPromotionUnitCount();
     }
 }

@@ -28,14 +28,17 @@ public class ProductStore {
                 .filter(product -> product.getPromotionType() == PromotionType.NONE)
                 .findFirst();
     }
+
+    public int getTotalStockByProductName(Order order) {
+        return findPromotionProduct(order)
+                .map(Product::getProductStock)
+                .orElse(0) +
+                findNonPromotionProduct(order)
+                        .map(Product::getProductStock)
+                        .orElse(0);
+    }
+
     public void printProductList() {
         this.productList.forEach(System.out::println);
-    }
-    public int findTotalNonPromoStock(Order order) {
-        return productList.stream()
-                .filter(product -> product.checkOrderProductName(order))
-                .filter(product -> product.getPromotionType() == PromotionType.NONE)
-                .mapToInt(Product::getProductStock)
-                .sum();
     }
 }

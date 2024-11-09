@@ -1,12 +1,16 @@
 package store.manager;
 
+import static store.error.ErrorMessage.INSUFFICIENT_STOCK_ERROR;
+import static store.error.ErrorMessage.NON_EXIST_PRODUCT_ERROR_MESSAGE;
+import static store.io.OutputView.printBonusItemPrompt;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import store.domain.Order;
 import store.domain.OrderResult;
 import store.domain.Product;
-import store.error.ErrorMessage;
+
+import store.domain.PromotionType;
 import store.io.InputView;
 import store.io.OutputView;
 import store.repository.ProductStore;
@@ -16,7 +20,7 @@ public class OrderManager {
     private final ProductStore productStore;
     private final List<OrderResult> orderResultList = new ArrayList<>();
 
-    public void printOrderResultList () {
+    public void printOrderResultList() {
         orderResultList.forEach(System.out::println);
     }
 
@@ -24,130 +28,107 @@ public class OrderManager {
         this.productStore = productStore;
     }
 
+    // 주문 로직
     public void processOrder(Order order) {
-        Product product = checkOrder(order);
-        int bonusItems = calculateBonusItems(order, product);
-        checkStockAvailability(order, product);
-
-        int promoUsage = calculatePromoUsage(order, product);
-        int finalOrderCount = handleRemainingStock(order, product, promoUsage);
-
-        saveOrderResult(order, product, finalOrderCount, bonusItems);
+        checkStockAvailabilityAtOrderTime(order);
+        Product product = checkOrderByProductName(order);
+        calculateBonusItemCount(product, order);
     }
 
-    // 재고 확인
-    private void checkStockAvailability(Order order, Product product) {
-        int totalStock = calculateTotalStock(order, product);
-        if (order.getOrderCount() > totalStock) {
-            OutputView.printInsufficientStock(order.getProductName(), order.getOrderCount());
-            throw new IllegalStateException("재고가 부족합니다.");
+    // 주문 시점에서 재고 확인
+    private void checkStockAvailabilityAtOrderTime(Order order) {
+        int totalStock = productStore.getTotalStockByProductName(order);
+        if (totalStock < order.getOrderCount()) {
+            throw new IllegalArgumentException(INSUFFICIENT_STOCK_ERROR.getErrorMessage());
         }
     }
 
-    // 프로모션 재고 사용량 계산
-    private int calculatePromoUsage(Order order, Product product) {
-        int promoStock = product.getProductStock();
-        int maxPromoItems = (promoStock / 3) * 3; // 탄산2+1 프로모션의 최대 적용 개수 계산
-        return Math.min(order.getOrderCount(), maxPromoItems);
-    }
-
-    // 총 재고 계산
-    private int calculateTotalStock(Order order, Product product) {
-        int promoStock = product.getProductStock();
-        int nonPromoStock = productStore.findTotalNonPromoStock(order);
-        return promoStock + nonPromoStock;
-    }
-
-    // 재고확인
-    public Product checkOrder(Order order) {
-        Optional<Product> promotionProduct = productStore.findPromotionProduct(order);
-        return promotionProduct.orElseGet(() -> productStore.findNonPromotionProduct(order)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        ErrorMessage.NON_EXIST_PRODUCT_ERROR_MESSAGE.getErrorMessage())));
-    }
-
-    // 보너스 아이템 계산
-    public int calculateBonusItems(Order order, Product product) {
-        int promoStock = product.getProductStock();
-        int bonusItems = product.calculateProductBonusItemCount(order);
-
-        if (product.needsAdditionalItemForBonus(order) && InputView.confirmBonusItem(order.getProductName())) {
-            if (order.getOrderCount() + 1 <= promoStock) {
-                order.plusOrderCount();
-                bonusItems++;
-            }
+    // 재고를 확인 후 충분하다면 받아온 Product객체에서 주문을 처리할 수 있다.
+    private void calculateBonusItemCount(Product product, Order order) {
+        // 재고가 부족할 경우 어떻게 처리하지 ?
+        if (!checkStockAvailability(product, order)) {
+            // 함수 만들자.
+            handleInsufficientStock(product, order);
+            return;
         }
-        return bonusItems;
+        // 재고가 충분하다면, 어떻게 처리할까?
+        handleSufficientStock(product, order);
     }
 
-
-    // 사용자에게 일반 결제 안내
-    private void notifyUserOfRegularPrice(int remainingCount, Product product) {
-        OutputView.printInsufficientPromotionStock(product.getProductName(), remainingCount);
-    }
-
-    // 잔여 주문 처리
-    private int handleRemainingStock(Order order, Product product, int promoUsage) {
-        int remainingOrderCount = order.getOrderCount() - promoUsage;
-
-        if (remainingOrderCount <= 0) {
-            product.decreasePromoStock(promoUsage);
-            return order.getOrderCount();
+    // 재고가 충분할 겨우 처리할 메서드
+    private void handleSufficientStock(Product product, Order order) {
+        int bonusItemCount = product.calculateProductBonusItemCount(order);
+        if (shouldAddBonusItem(product, order)) {
+            applyBonusItemAndReduceStock(product, order, bonusItemCount);
+            return;
         }
-
-        notifyUserOfRegularPrice(remainingOrderCount, product);
-        return handleRemainingOrder(order, product, promoUsage, remainingOrderCount);
-    }
-
-    // 일반 결제 처리
-    private int handleRemainingOrder(Order order, Product promoProduct, int promoUsage, int remainingCount) {
-        if (InputView.confirmPurchaseWithoutPromotion()) {
-            return processRegularPurchase(order, promoProduct, promoUsage, remainingCount);
+        if (product.getPromotionType() != PromotionType.NONE && !isExactPromotionOrder(product, order)) {
+            handlePartialPromotionOrder(product, order, bonusItemCount);
+            return;
         }
-        return processPromoOnlyPurchase(order, promoProduct, promoUsage);
+        orderResultList.add(new OrderResult(order, bonusItemCount, product.getPromotionType()));
     }
 
-    // 일반 결제 처리
-    private int processRegularPurchase(Order order, Product promoProduct, int promoUsage, int remainingCount) {
-        promoProduct.decreasePromoStock(promoUsage);
+    private boolean isExactPromotionOrder(Product product, Order order) {
+        int promotionUnitCount = product.getPromotionUnitCount();
+        return order.getOrderCount() % promotionUnitCount == 0;
+    }
 
-        Product nonPromoProduct = findNonPromoProduct(order);
-        if (nonPromoProduct.getProductStock() < remainingCount) {
-            OutputView.printInsufficientStock(order.getProductName(), remainingCount);
-            throw new IllegalStateException("일반 상품 재고가 부족합니다.");
+    // 보너스 아이템을 추가할 수 있는지 확인하는 메서드
+    private boolean shouldAddBonusItem(Product product, Order order) {
+        return product.needsAdditionalItemForBonus(order)
+                && canFulfillPromotionOrder(product, order)
+                && printBonusItemPrompt(product.getProductName());
+    }
+
+    private void applyBonusItemAndReduceStock(Product product, Order order, int bonusItemCount) {
+        bonusItemCount++;
+        order.plusOrderCount();
+
+        product.decreasePromoStock(order.getOrderCount());
+
+        orderResultList.add(new OrderResult(order, bonusItemCount, product.getPromotionType()));
+    }
+
+    // 재고가 충분 && 보너스 상품 제공하기엔 부족
+    private void handlePartialPromotionOrder(Product product, Order order, int bonusItemCount) {
+        int remainCount = order.getOrderCount() - (bonusItemCount * product.getPromotionUnitCount());
+        if (OutputView.printInsufficientPromotionStock(order.getProductName(), remainCount)) {
+            product.decreasePromoStock(order.getOrderCount());
+            orderResultList.add(new OrderResult(order, bonusItemCount, product.getPromotionType()));
         }
-
-        nonPromoProduct.decreaseNonPromoStock(remainingCount);
-        return order.getOrderCount();
     }
 
-    private int processPromoOnlyPurchase(Order order, Product promoProduct, int promoUsage) {
-        promoProduct.decreasePromoStock(promoUsage);
-        order.updateOrderCount(promoUsage);
-        return promoUsage;
+    // 조건 ( orderCount 숫자가 재고 +1 보다 커버리면 false
+    private boolean canFulfillPromotionOrder(Product product, Order order) {
+        return product.productStockCompareOrderQuantity(order.getOrderCount() + 1);
     }
 
-    // 일반 재고 감소
-    private void decreaseNonPromoStock(Order order, int count) {
-        Product nonPromoProduct = findNonPromoProduct(order);
-        nonPromoProduct.decreaseNonPromoStock(count);
+    // 재고가 부족할 경우 처리할 메서드
+    private void handleInsufficientStock(Product product, Order order) {
+        // 주문 수 , 재고 수 ,
+        int remainingOrderCount = order.getOrderCount() - product.getProductStock();
+        System.out.println("remaining order count: " + remainingOrderCount);
     }
 
-    // 일반 상품 찾기
-    private Product findNonPromoProduct(Order order) {
-        return productStore.findNonPromotionProduct(order)
-                .orElseThrow(() -> new IllegalStateException("일반 상품 재고가 부족합니다."));
+    // Product객체 안에서 재고를 확인하고 비교한다.
+    private boolean checkStockAvailability(Product product, Order order) {
+        return product.productStockCompareOrderQuantity(order.getOrderCount());
     }
 
-
-    // 주문 결과 저장
-    private void saveOrderResult(Order order, Product product, int orderCount, int bonusItems) {
-        int totalPrice = orderCount * product.getProductPrice();
-        OrderResult result = new OrderResult(order, bonusItems, totalPrice);
-        orderResultList.add(result);
+    // 주문 상품 이름으로 먼저 Product 객체 찾기
+    private Product checkOrderByProductName(Order order) {
+        return productStore.findPromotionProduct(order)
+                .orElseGet(() -> productStore.findNonPromotionProduct(order)
+                        .orElseThrow(
+                                () -> new IllegalArgumentException(NON_EXIST_PRODUCT_ERROR_MESSAGE.getErrorMessage())));
     }
 
     public static void main(String[] args) {
+        OrderManager orderManager = new OrderManager(new ProductStore(InputView.initProductStore()));
+
+        orderManager.processOrder(new Order("콜라", "15"));
+        orderManager.printOrderResultList();
 
     }
 }

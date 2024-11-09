@@ -2,13 +2,13 @@ package store.domain;
 
 import java.time.LocalDate;
 import java.util.Arrays;
-import net.bytebuddy.dynamic.scaffold.TypeInitializer.None;
 import store.error.ErrorMessage;
 
 public enum PromotionType {
     NONE("null",
             null,
-            null) {
+            null,
+            1) {
         @Override
         public int calculateBonusItems(int orderCount) {
             return 0;
@@ -16,7 +16,8 @@ public enum PromotionType {
     },
     CARBONATE_TWO_PLUS_ONE("탄산2+1",
             LocalDate.of(2024, 1, 1),
-            LocalDate.of(2024, 12, 31)
+            LocalDate.of(2024, 12, 31),
+            3
     ) {
         @Override
         public int calculateBonusItems(int orderCount) {
@@ -30,7 +31,8 @@ public enum PromotionType {
     },
     FLASH_SALE("반짝할인",
             LocalDate.of(2024, 11, 1),
-            LocalDate.of(2024, 11, 30)
+            LocalDate.of(2024, 11, 30),
+            2
     ) {
         @Override
         public int calculateBonusItems(int orderCount) {
@@ -44,7 +46,8 @@ public enum PromotionType {
     },
     MD_RECOMMENDATION("MD추천상품",
             LocalDate.of(2024, 1, 1),
-            LocalDate.of(2024, 12, 31)
+            LocalDate.of(2024, 12, 31),
+            2
     ) {
         @Override
         public int calculateBonusItems(int orderCount) {
@@ -58,14 +61,16 @@ public enum PromotionType {
     },
 
     ;
-    private String promotionName;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private final String promotionName;
+    private final LocalDate startDate;
+    private final LocalDate endDate;
+    private final int promotionUnitCount;
 
-    private PromotionType(String promotionName, LocalDate startDate, LocalDate endDate) {
+    private PromotionType(String promotionName, LocalDate startDate, LocalDate endDate, int promotionUnitCount) {
         this.promotionName = promotionName;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.promotionUnitCount = promotionUnitCount;
     }
 
     public static PromotionType from(String type) {
@@ -98,5 +103,9 @@ public enum PromotionType {
         }
         return (orderTime.isEqual(startDate) || orderTime.isAfter(startDate)) &&
                 (orderTime.isEqual(endDate) || orderTime.isBefore(endDate));
+    }
+
+    public int getPromotionUnitCount() {
+        return promotionUnitCount;
     }
 }

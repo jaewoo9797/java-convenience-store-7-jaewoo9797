@@ -3,12 +3,12 @@ package store.domain;
 public class OrderResult {
     private final Order order;
     private final int bonusQuantity;
-    private final int totalPrice;
+    private final PromotionType promotionType;
 
-    public OrderResult(Order order, int bonusQuantity, int totalPrice) {
+    public OrderResult(Order order, int bonusQuantity, PromotionType promotionType) {
         this.order = order;
         this.bonusQuantity = bonusQuantity;
-        this.totalPrice = totalPrice;
+        this.promotionType = promotionType;
     }
 
     public String getProductName() {
@@ -23,16 +23,14 @@ public class OrderResult {
         return bonusQuantity;
     }
 
-    public int getTotalPrice() {
-        return totalPrice;
-    }
+
 
     @Override
     public String toString() {
         return "OrderResult{" +
                 "order=" + order.toString() +
                 ", bonusQuantity=" + bonusQuantity +
-                ", totalPrice=" + totalPrice +
+                ", promotionType=" + promotionType.printPromotionType() +
                 '}';
     }
 }
