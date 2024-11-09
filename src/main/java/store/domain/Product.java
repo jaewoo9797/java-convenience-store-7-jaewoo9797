@@ -1,5 +1,7 @@
 package store.domain;
 
+import static store.error.ErrorMessage.INSUFFICIENT_STOCK_ERROR;
+
 import java.time.LocalDate;
 import store.error.ErrorMessage;
 
@@ -30,8 +32,12 @@ public class Product {
         return order.getProductName().equals(productName);
     }
 
-    public int calculateProductBonusItemCount(Order order) {
-        return this.promotionType.calculateBonusItems(order.getOrderCount());
+    public int calculateProductBonusItemCount(int orderCount) {
+        return this.promotionType.calculateBonusItems(orderCount);
+    }
+
+    public int maxOrderFromPromotionStock( int orderCount) {
+        return Math.min(getProductStock(), orderCount);
     }
 
     public boolean needsAdditionalItemForBonus(Order order) {
@@ -40,14 +46,14 @@ public class Product {
 
     public void decreasePromoStock(int count) {
         if (productStock < count) {
-            throw new IllegalStateException("프로모션 재고가 부족합니다.");
+            throw new IllegalStateException(INSUFFICIENT_STOCK_ERROR.getErrorMessage());
         }
         productStock -= count;
     }
 
     public void decreaseNonPromoStock(int count) {
         if (productStock < count) {
-            throw new IllegalStateException("일반 재고가 부족합니다.");
+            throw new IllegalStateException(INSUFFICIENT_STOCK_ERROR.getErrorMessage());
         }
         productStock -= count;
     }

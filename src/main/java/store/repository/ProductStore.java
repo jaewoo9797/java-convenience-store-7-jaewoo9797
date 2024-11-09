@@ -19,6 +19,7 @@ public class ProductStore {
                 .filter(product -> product.checkOrderProductName(order))
                 .filter(product -> product.getPromotionType() != PromotionType.NONE)
                 .filter(product -> product.checkPromotionDuration(order))
+                .filter(product -> product.getProductStock() > 0)
                 .findFirst();
     }
 

@@ -11,7 +11,8 @@ import store.domain.OrderResult;
 import store.domain.Product;
 
 import store.domain.PromotionType;
-import store.io.InputView;
+import store.domain.Receipt;
+import store.error.ErrorMessage;
 import store.io.OutputView;
 import store.repository.ProductStore;
 
@@ -45,7 +46,7 @@ public class OrderManager {
 
     // 재고를 확인 후 충분하다면 받아온 Product객체에서 주문을 처리할 수 있다.
     private void calculateBonusItemCount(Product product, Order order) {
-        // 재고가 부족할 경우 어떻게 처리하지 ?
+        // 처음에 찾은 Product에서 재고가 부족할 경우 어떻게 처리하지 ?
         if (!checkStockAvailability(product, order)) {
             // 함수 만들자.
             handleInsufficientStock(product, order);
@@ -57,7 +58,7 @@ public class OrderManager {
 
     // 재고가 충분할 겨우 처리할 메서드
     private void handleSufficientStock(Product product, Order order) {
-        int bonusItemCount = product.calculateProductBonusItemCount(order);
+        int bonusItemCount = product.calculateProductBonusItemCount(order.getOrderCount());
         if (shouldAddBonusItem(product, order)) {
             applyBonusItemAndReduceStock(product, order, bonusItemCount);
             return;
@@ -66,7 +67,8 @@ public class OrderManager {
             handlePartialPromotionOrder(product, order, bonusItemCount);
             return;
         }
-        orderResultList.add(new OrderResult(order, bonusItemCount, product.getPromotionType()));
+        product.decreaseNonPromoStock(order.getOrderCount());
+        orderResultList.add(new OrderResult(order, bonusItemCount, product.getProductPrice(), product.getPromotionType()));
     }
 
     private boolean isExactPromotionOrder(Product product, Order order) {
@@ -87,7 +89,7 @@ public class OrderManager {
 
         product.decreasePromoStock(order.getOrderCount());
 
-        orderResultList.add(new OrderResult(order, bonusItemCount, product.getPromotionType()));
+        orderResultList.add(new OrderResult(order, bonusItemCount, product.getProductPrice(), product.getPromotionType()));
     }
 
     // 재고가 충분 && 보너스 상품 제공하기엔 부족
@@ -95,7 +97,7 @@ public class OrderManager {
         int remainCount = order.getOrderCount() - (bonusItemCount * product.getPromotionUnitCount());
         if (OutputView.printInsufficientPromotionStock(order.getProductName(), remainCount)) {
             product.decreasePromoStock(order.getOrderCount());
-            orderResultList.add(new OrderResult(order, bonusItemCount, product.getPromotionType()));
+            orderResultList.add(new OrderResult(order, bonusItemCount, product.getProductPrice(), product.getPromotionType()));
         }
     }
 
@@ -106,9 +108,25 @@ public class OrderManager {
 
     // 재고가 부족할 경우 처리할 메서드
     private void handleInsufficientStock(Product product, Order order) {
-        // 주문 수 , 재고 수 ,
-        int remainingOrderCount = order.getOrderCount() - product.getProductStock();
-        System.out.println("remaining order count: " + remainingOrderCount);
+        int maxOrderFromPromotionStock = product.maxOrderFromPromotionStock(order.getOrderCount());
+        int bonusItemCount = product.calculateProductBonusItemCount(maxOrderFromPromotionStock);
+        int remainingOrderCount = order.getOrderCount() - maxOrderFromPromotionStock;
+        int promotionUnitCount = order.getOrderCount() - product.getPromotionUnitCount() * bonusItemCount;
+        Product nonPromotionProduct = findNonPromotionProduct(order);
+
+        if (OutputView.printInsufficientPromotionStock(order.getProductName(), promotionUnitCount)) {
+            reduceStocks(product, nonPromotionProduct, maxOrderFromPromotionStock, remainingOrderCount);
+            saveOrderResult(order, bonusItemCount, product);
+        }
+    }
+
+    private void saveOrderResult(Order order, int bonusItemCount, Product product) {
+        orderResultList.add(new OrderResult(order, bonusItemCount, product.getProductPrice(), product.getPromotionType()));
+    }
+
+    private void reduceStocks(Product product, Product nonPromotionProduct, int promoStockUsed, int nonPromoStockUsed) {
+        product.decreasePromoStock(promoStockUsed);
+        nonPromotionProduct.decreaseNonPromoStock(nonPromoStockUsed);
     }
 
     // Product객체 안에서 재고를 확인하고 비교한다.
@@ -124,11 +142,24 @@ public class OrderManager {
                                 () -> new IllegalArgumentException(NON_EXIST_PRODUCT_ERROR_MESSAGE.getErrorMessage())));
     }
 
-    public static void main(String[] args) {
-        OrderManager orderManager = new OrderManager(new ProductStore(InputView.initProductStore()));
+    private Product findNonPromotionProduct(Order order) {
+        return productStore.findNonPromotionProduct(order)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        ErrorMessage.INPUT_ERROR_MESSAGE.getErrorMessage()));
+    }
 
-        orderManager.processOrder(new Order("콜라", "15"));
-        orderManager.printOrderResultList();
+    public List<OrderResult> getOrderResultList() {
+        return orderResultList;
+    }
 
+    public void printAllProductInfo() {
+        productStore.printProductList();
+    }
+
+    public void printFinalReceipt() {
+        Receipt receipt = new Receipt(orderResultList);
+        receipt.calculateTotals();
+        receipt.applyMemberShipDiscount();
+        OutputView.printReceipt(receipt);
     }
 }
