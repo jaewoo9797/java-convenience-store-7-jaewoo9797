@@ -1,5 +1,6 @@
 package store.domain;
 
+import camp.nextstep.edu.missionutils.DateTimes;
 import java.time.LocalDate;
 import store.error.ErrorMessage;
 
@@ -25,7 +26,7 @@ public class Order {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException(ErrorMessage.INPUT_ERROR_MESSAGE.getErrorMessage());
         }
-        this.createdDate = LocalDate.now();
+        this.createdDate = DateTimes.now().toLocalDate();
     }
 
     public String getProductName() {
