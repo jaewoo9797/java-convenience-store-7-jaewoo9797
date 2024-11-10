@@ -24,7 +24,6 @@ public class Product {
         this.promotionType = PromotionType.from(promotionType);
     }
 
-    // 주문 수량과 재고 비교
     public boolean productStockCompareOrderQuantity(int orderCount) {
         return Integer.compare(productStock, orderCount) != INSUFFICIENT_STOCK;
     }

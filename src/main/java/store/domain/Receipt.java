@@ -61,13 +61,4 @@ public class Receipt {
         return orderResults;
     }
 
-    @Override
-    public String toString() {
-        return "Receipt{" +
-                "orderResults=" + orderResults +
-                ", totalAmount=" + totalAmount +
-                ", totalPromotionDiscount=" + totalPromotionDiscount +
-                ", membershipDiscount=" + membershipDiscount +
-                '}';
-    }
 }

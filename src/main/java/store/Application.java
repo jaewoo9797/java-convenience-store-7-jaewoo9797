@@ -17,13 +17,10 @@ public class Application {
             processOrdersWithRetry(orderManager);
 
         } while (InputView.inputOrderMoreToUser());
-
     }
 
-    // 주문 입력 및 처리를 재시도하는 메서드
     private static void processOrdersWithRetry(OrderManager orderManager) {
         try {
-            // 사용자로부터 주문 입력 받기
             List<Order> orders = InputView.inputOrderFromUser();
             orders.forEach(orderManager::processOrder);
             orderManager.printFinalReceipt();

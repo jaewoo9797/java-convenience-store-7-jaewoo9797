@@ -29,14 +29,12 @@ public class OrderManager {
         this.productStore = productStore;
     }
 
-    // 주문 로직
     public void processOrder(Order order) {
         checkStockAvailabilityAtOrderTime(order);
         Product product = checkOrderByProductName(order);
         calculateBonusItemCount(product, order);
     }
 
-    // 주문 시점에서 재고 확인
     private void checkStockAvailabilityAtOrderTime(Order order) {
         int totalStock = productStore.getTotalStockByProductName(order);
         if (totalStock < order.getOrderCount()) {
@@ -44,19 +42,14 @@ public class OrderManager {
         }
     }
 
-    // 재고를 확인 후 충분하다면 받아온 Product객체에서 주문을 처리할 수 있다.
     private void calculateBonusItemCount(Product product, Order order) {
-        // 처음에 찾은 Product에서 재고가 부족할 경우 어떻게 처리하지 ?
         if (!checkStockAvailability(product, order)) {
-            // 함수 만들자.
             handleInsufficientStock(product, order);
             return;
         }
-        // 재고가 충분하다면, 어떻게 처리할까?
         handleSufficientStock(product, order);
     }
 
-    // 재고가 충분할 겨우 처리할 메서드
     private void handleSufficientStock(Product product, Order order) {
         int bonusItemCount = product.calculateProductBonusItemCount(order.getOrderCount());
         if (shouldAddBonusItem(product, order)) {
@@ -68,7 +61,8 @@ public class OrderManager {
             return;
         }
         product.decreaseNonPromoStock(order.getOrderCount());
-        orderResultList.add(new OrderResult(order, bonusItemCount, product.getProductPrice(), product.getPromotionType()));
+        orderResultList.add(
+                new OrderResult(order, bonusItemCount, product.getProductPrice(), product.getPromotionType()));
     }
 
     private boolean isExactPromotionOrder(Product product, Order order) {
@@ -76,7 +70,6 @@ public class OrderManager {
         return order.getOrderCount() % promotionUnitCount == 0;
     }
 
-    // 보너스 아이템을 추가할 수 있는지 확인하는 메서드
     private boolean shouldAddBonusItem(Product product, Order order) {
         return product.needsAdditionalItemForBonus(order)
                 && canFulfillPromotionOrder(product, order)
@@ -89,19 +82,19 @@ public class OrderManager {
 
         product.decreasePromoStock(order.getOrderCount());
 
-        orderResultList.add(new OrderResult(order, bonusItemCount, product.getProductPrice(), product.getPromotionType()));
+        orderResultList.add(
+                new OrderResult(order, bonusItemCount, product.getProductPrice(), product.getPromotionType()));
     }
 
-    // 재고가 충분 && 보너스 상품 제공하기엔 부족
     private void handlePartialPromotionOrder(Product product, Order order, int bonusItemCount) {
         int remainCount = order.getOrderCount() - (bonusItemCount * product.getPromotionUnitCount());
         if (OutputView.printInsufficientPromotionStock(order.getProductName(), remainCount)) {
             product.decreasePromoStock(order.getOrderCount());
-            orderResultList.add(new OrderResult(order, bonusItemCount, product.getProductPrice(), product.getPromotionType()));
+            orderResultList.add(
+                    new OrderResult(order, bonusItemCount, product.getProductPrice(), product.getPromotionType()));
         }
     }
 
-    // 조건 ( orderCount 숫자가 재고 +1 보다 커버리면 false
     private boolean canFulfillPromotionOrder(Product product, Order order) {
         return product.productStockCompareOrderQuantity(order.getOrderCount() + 1);
     }
@@ -121,7 +114,8 @@ public class OrderManager {
     }
 
     private void saveOrderResult(Order order, int bonusItemCount, Product product) {
-        orderResultList.add(new OrderResult(order, bonusItemCount, product.getProductPrice(), product.getPromotionType()));
+        orderResultList.add(
+                new OrderResult(order, bonusItemCount, product.getProductPrice(), product.getPromotionType()));
     }
 
     private void reduceStocks(Product product, Product nonPromotionProduct, int promoStockUsed, int nonPromoStockUsed) {

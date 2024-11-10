@@ -72,7 +72,6 @@ public class InputView {
         return orders;
     }
 
-    // 더 구매를 원하는지 물어보는 메서드
     public static boolean inputOrderMoreToUser() {
         System.out.println("감사합니다. 구매하고 싶은 다른 상품이 있나요? (Y/N)");
         return confirmFromUser();
