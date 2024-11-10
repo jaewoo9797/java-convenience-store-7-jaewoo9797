@@ -61,11 +61,21 @@ public class OutputView {
         int totalPromotionDiscount = receipt.getTotalPromotionDiscount();
         int membershipDiscount = receipt.getMembershipDiscount();
         int finalAmount = totalAmount - totalPromotionDiscount - membershipDiscount;
+        consolePrintReceiptFooter(totalOrderCount, totalAmount, totalPromotionDiscount, membershipDiscount,
+                finalAmount);
+    }
 
+    private static void consolePrintReceiptFooter(int totalOrderCount, int totalAmount, int totalPromotionDiscount,
+                                                  int membershipDiscount, int finalAmount) {
         System.out.println("======================================");
         System.out.printf("총구매액\t\t\t%d\t\t%,d원\n", totalOrderCount, totalAmount);
         System.out.printf("행사할인\t\t\t\t\t-%d원\n", totalPromotionDiscount);
         System.out.printf("멤버십할인\t\t\t\t\t-%d원\n", membershipDiscount);
-        System.out.printf("내실돈\t\t\t\t\t\t%,d원\n", finalAmount);
+        System.out.printf("내실돈\t\t\t\t\t\t%,d원\n\n", finalAmount);
+    }
+
+    public static void printWelcomeGreeting() {
+        System.out.println("안녕하세요. W편의점입니다.\n"
+                + "현재 보유하고 있는 상품입니다.\n");
     }
 }

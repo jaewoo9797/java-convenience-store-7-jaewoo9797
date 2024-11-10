@@ -7,6 +7,7 @@ import store.error.ErrorMessage;
 
 public class Product {
     private static final int INSUFFICIENT_STOCK = -1;
+    private static final int NON_STOCK = 0;
     private final String productName;
     private final int productPrice;
     private int productStock;
@@ -60,8 +61,11 @@ public class Product {
 
     @Override
     public String toString() {
+        if (productStock == NON_STOCK) {
+            return String.format("- %s %,d원 재고 없음 %s", productName, productPrice, promotionType.printPromotionType());
+        }
         return String.format("- %s %,d원 %d개 %s", productName, productPrice, productStock,
-                promotionType.printPromotionType().trim());
+                promotionType.printPromotionType());
     }
 
     public String getProductName() {

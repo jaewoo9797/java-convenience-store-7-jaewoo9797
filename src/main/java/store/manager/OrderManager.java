@@ -161,5 +161,6 @@ public class OrderManager {
         receipt.calculateTotals();
         receipt.applyMemberShipDiscount();
         OutputView.printReceipt(receipt);
+        orderResultList.clear();
     }
 }
