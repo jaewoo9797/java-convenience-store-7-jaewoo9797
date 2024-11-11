@@ -102,8 +102,9 @@ public enum PromotionType {
         if (this == NONE) {
             return false;
         }
-        return (orderTime.isEqual(startDateTime) || orderTime.isAfter(startDateTime)) &&
-                (orderTime.isEqual(endDateTime) || orderTime.isBefore(endDateTime));
+        boolean isAfterStart = orderTime.isEqual(startDateTime) || orderTime.isAfter(startDateTime);
+        boolean isBeforeEnd = orderTime.isEqual(endDateTime) || orderTime.isBefore(endDateTime);
+        return isAfterStart && isBeforeEnd;
     }
 
     public int getPromotionUnitCount() {
