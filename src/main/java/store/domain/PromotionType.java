@@ -1,13 +1,14 @@
 package store.domain;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import store.error.ErrorMessage;
 
 public enum PromotionType {
     NONE("null",
-            null,
-            null,
+            LocalDateTime.MIN,
+            LocalDateTime.MIN,
             1) {
         @Override
         public int calculateBonusItems(int orderCount) {
@@ -15,8 +16,8 @@ public enum PromotionType {
         }
     },
     CARBONATE_TWO_PLUS_ONE("탄산2+1",
-            LocalDateTime.of(2024, 1, 1,0,0),
-            LocalDateTime.of(2024, 12, 31, 23, 59, 59),
+            LocalDate.of(2024, 1, 1).atStartOfDay(),
+            LocalDate.of(2024, 12, 31).atTime(23, 59, 59),
             3
     ) {
         @Override
@@ -30,8 +31,8 @@ public enum PromotionType {
         }
     },
     FLASH_SALE("반짝할인",
-            LocalDateTime.of(2024, 11, 1,0,0),
-            LocalDateTime.of(2024, 11, 30, 23, 59, 59),
+            LocalDate.of(2024, 11, 1).atStartOfDay(),
+            LocalDate.of(2024, 11, 30).atTime(23, 59, 59),
             2
     ) {
         @Override
@@ -45,8 +46,8 @@ public enum PromotionType {
         }
     },
     MD_RECOMMENDATION("MD추천상품",
-            LocalDateTime.of(2024, 1, 1,0,0),
-            LocalDateTime.of(2024, 12, 31, 23, 59, 59),
+            LocalDate.of(2024, 1, 1).atStartOfDay(),
+            LocalDate.of(2024, 12, 31).atTime(23, 59, 59),
             2
     ) {
         @Override
@@ -60,6 +61,7 @@ public enum PromotionType {
         }
     },
     ;
+
     private final String promotionName;
     private final LocalDateTime startDateTime;
     private final LocalDateTime endDateTime;
@@ -97,7 +99,7 @@ public enum PromotionType {
     }
 
     public boolean isPromotionDuration(LocalDateTime orderTime) {
-        if (NONE == this) {
+        if (this == NONE) {
             return false;
         }
         return (orderTime.isEqual(startDateTime) || orderTime.isAfter(startDateTime)) &&
