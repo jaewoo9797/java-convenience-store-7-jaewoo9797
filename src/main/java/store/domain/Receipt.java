@@ -25,7 +25,7 @@ public class Receipt {
     private void calculateMemberShipDiscount() {
         for (OrderResult orderResult : orderResults) {
             if (orderResult.getPromotionType() == PromotionType.NONE) {
-                int discount = (int) (orderResult.getProductPrice() * 0.3);
+                int discount = (int) (orderResult.getProductPrice() * orderResult.getOrderCount() * 0.3);
                 this.membershipDiscount += Math.min(discount, 8000);
             }
         }
