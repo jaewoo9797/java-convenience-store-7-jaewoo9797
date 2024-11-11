@@ -60,6 +60,20 @@ public class OrderManager {
             handlePartialPromotionOrder(product, order, bonusItemCount);
             return;
         }
+        processNonPromotionOrder(product, order, bonusItemCount);
+    }
+
+    private void processNonPromotionOrder(Product product, Order order, int bonusItemCount) {
+        if (productStore.PromotionProductExist(order) && !OutputView.printInsufficientPromotionStock(order.getProductName(),order.getOrderCount())) {
+            System.out.printf("%s 주문이 취소되었습니다.\n", order.getProductName());
+            return;
+        }
+
+        // 일반 재고에서 주문 처리
+        processOrderWithNonPromotionStock(product, order, bonusItemCount);
+    }
+
+    private void processOrderWithNonPromotionStock(Product product, Order order, int bonusItemCount) {
         product.decreaseNonPromoStock(order.getOrderCount());
         orderResultList.add(
                 new OrderResult(order, bonusItemCount, product.getProductPrice(), product.getPromotionType()));

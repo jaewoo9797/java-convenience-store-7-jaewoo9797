@@ -39,6 +39,13 @@ public class ProductStore {
                         .orElse(0);
     }
 
+    public boolean PromotionProductExist(Order order) {
+        return productList.stream()
+                .filter(product -> product.checkOrderProductName(order))
+                .filter(product -> product.getPromotionType() != PromotionType.NONE)
+                .anyMatch(product -> product.getProductStock() == 0);
+    }
+
     public void printProductList() {
         this.productList.forEach(System.out::println);
     }

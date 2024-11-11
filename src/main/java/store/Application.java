@@ -1,5 +1,6 @@
 package store;
 
+import java.time.LocalDate;
 import java.util.List;
 import store.domain.Order;
 import store.io.InputView;
@@ -17,6 +18,9 @@ public class Application {
             processOrdersWithRetry(orderManager);
 
         } while (InputView.inputOrderMoreToUser());
+        Order order = new Order("감자칩","2",LocalDate.of(2024,1,1));
+        orderManager.processOrder(order);
+        orderManager.printFinalReceipt();
     }
 
     private static void processOrdersWithRetry(OrderManager orderManager) {
