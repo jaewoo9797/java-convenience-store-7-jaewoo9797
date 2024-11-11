@@ -12,13 +12,13 @@ import store.domain.Product;
 public class InputView {
     private static final String AGREEMENT_LETTER = "Y";
     private static final String RESOURCE_ADRRESS = "src/main/resources/products.md";
-    private static final String ORDER_INPUT_PATTERN = "^\\[[가-힣a-zA-Z0-9]+-\\d+\\]$";
+    private static final String ORDER_INPUT_PATTERN = "^\\[[가-힣a-zA-Z0-9]+-\\d+\\](,\\[[가-힣a-zA-Z0-9]+-\\d+\\])*$";
 
 
     public static List<Product> initProductStore() {
         List<Product> products = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(RESOURCE_ADRRESS))) {
-            br.readLine(); // Skip header line
+            br.readLine();
             while (br.ready()) {
                 String line = br.readLine();
                 products.add(parseProduct(line));
@@ -32,7 +32,7 @@ public class InputView {
     private static Product parseProduct(String line) {
         String[] info = line.split(",");
         if (info.length < 4) {
-            throw new IllegalArgumentException("상품 데이터 형식이 잘못되었습니다.");
+            throw new IllegalArgumentException("[ERROR] 상품 데이터 형식이 잘못되었습니다.");
         }
         return new Product(info[0], info[1], info[2], info[3]);
     }
@@ -45,9 +45,9 @@ public class InputView {
         System.out.println("\n구매하실 상품명과 수량을 입력해 주세요. (예: [사이다-2],[감자칩-1])");
         String input = Console.readLine();
 
-//        if (!isValidOrderInput(input)) {
-//            throw new IllegalArgumentException("[ERROR] 입력 형식이 잘못되었습니다. 다시 입력해 주세요.");
-//        }
+        if (!isValidOrderInput(input)) {
+            throw new IllegalArgumentException("[ERROR] 입력 형식이 잘못되었습니다. 다시 입력해 주세요.");
+        }
 
         return parseOrderInput(input);
     }
@@ -77,4 +77,9 @@ public class InputView {
         return confirmFromUser();
     }
 
+    public static void main(String[] args) {
+        while(true){
+            inputOrderFromUser();
+        }
+    }
 }
