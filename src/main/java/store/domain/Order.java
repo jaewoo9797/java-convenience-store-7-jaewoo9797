@@ -45,16 +45,12 @@ public class Order {
         orderCount++;
     }
 
-    public void updateOrderCount(int newCount) {
-        this.orderCount = newCount;
+    public void decreaseOrderCount(int decreaseCount) {
+        this.orderCount -= decreaseCount;
     }
 
-    @Override
-    public String toString() {
-        return "Order{" +
-                "ProductName='" + ProductName + '\'' +
-                ", orderCount=" + orderCount +
-                ", createdDate=" + createdDate +
-                '}';
+
+    public void updateOrderCount(int adjustedOrderCount) {
+        this.orderCount = adjustedOrderCount;
     }
 }

@@ -89,10 +89,24 @@ public class OrderManager {
     private void handlePartialPromotionOrder(Product product, Order order, int bonusItemCount) {
         int remainCount = order.getOrderCount() - (bonusItemCount * product.getPromotionUnitCount());
         if (OutputView.printInsufficientPromotionStock(order.getProductName(), remainCount)) {
-            product.decreasePromoStock(order.getOrderCount());
-            orderResultList.add(
-                    new OrderResult(order, bonusItemCount, product.getProductPrice(), product.getPromotionType()));
+            processFullOrder(product, order, bonusItemCount);
+            return;
         }
+        processPartialOrder(product, order, bonusItemCount, remainCount);
+    }
+
+    private void processFullOrder(Product product, Order order, int bonusItemCount) {
+        product.decreasePromoStock(order.getOrderCount());
+        orderResultList.add(
+                new OrderResult(order, bonusItemCount, product.getProductPrice(), product.getPromotionType()));
+    }
+
+    private void processPartialOrder(Product product, Order order, int bonusItemCount, int remainCount) {
+        int adjustedOrderCount = order.getOrderCount() - remainCount;
+        order.decreaseOrderCount(remainCount);
+        product.decreasePromoStock(adjustedOrderCount);
+        orderResultList.add(
+                new OrderResult(order, bonusItemCount, product.getProductPrice(), product.getPromotionType()));
     }
 
     private boolean canFulfillPromotionOrder(Product product, Order order) {
@@ -108,9 +122,23 @@ public class OrderManager {
         Product nonPromotionProduct = findNonPromotionProduct(order);
 
         if (OutputView.printInsufficientPromotionStock(order.getProductName(), promotionUnitCount)) {
-            reduceStocks(product, nonPromotionProduct, maxOrderFromPromotionStock, remainingOrderCount);
-            saveOrderResult(order, bonusItemCount, product);
+            finalizeFullOrder(product, nonPromotionProduct, order, bonusItemCount, maxOrderFromPromotionStock,
+                    remainingOrderCount);
+            return;
         }
+        finalizePartialOrder(product, order, bonusItemCount, promotionUnitCount);
+    }
+
+    private void finalizePartialOrder(Product product, Order order, int bonusItemCount, int promotionUnitCount) {
+        order.decreaseOrderCount(promotionUnitCount);
+        product.decreasePromoStock(order.getOrderCount());
+        saveOrderResult(order, bonusItemCount, product);
+    }
+
+    private void finalizeFullOrder(Product product, Product nonPromotionProduct, Order order, int bonusItemCount,
+                                   int promoStockUsed, int nonPromoStockUsed) {
+        reduceStocks(product, nonPromotionProduct, promoStockUsed, nonPromoStockUsed);
+        saveOrderResult(order, bonusItemCount, product);
     }
 
     private void saveOrderResult(Order order, int bonusItemCount, Product product) {
