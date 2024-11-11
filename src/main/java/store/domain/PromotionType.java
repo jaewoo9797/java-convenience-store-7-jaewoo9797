@@ -16,7 +16,7 @@ public enum PromotionType {
     },
     CARBONATE_TWO_PLUS_ONE("탄산2+1",
             LocalDateTime.of(2024, 1, 1,0,0),
-            LocalDateTime.of(2024, 12, 30, 23, 59, 59),
+            LocalDateTime.of(2024, 12, 31, 23, 59, 59),
             3
     ) {
         @Override
@@ -31,7 +31,7 @@ public enum PromotionType {
     },
     FLASH_SALE("반짝할인",
             LocalDateTime.of(2024, 11, 1,0,0),
-            LocalDateTime.of(2024, 11, 29, 23, 59, 59),
+            LocalDateTime.of(2024, 11, 30, 23, 59, 59),
             2
     ) {
         @Override
@@ -46,7 +46,7 @@ public enum PromotionType {
     },
     MD_RECOMMENDATION("MD추천상품",
             LocalDateTime.of(2024, 1, 1,0,0),
-            LocalDateTime.of(2024, 12, 30, 23, 59, 59),
+            LocalDateTime.of(2024, 12, 31, 23, 59, 59),
             2
     ) {
         @Override
