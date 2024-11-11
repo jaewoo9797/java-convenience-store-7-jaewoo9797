@@ -32,10 +32,21 @@ public class OrderManager {
     }
 
     private void checkStockAvailabilityAtOrderTime(Order order) {
-        int totalStock = productStore.getTotalStockByProductName(order);
-        if (totalStock < order.getOrderCount()) {
+        int availableStock = getAvailableStock(order);
+        if (availableStock < order.getOrderCount()) {
             throw new IllegalArgumentException(INSUFFICIENT_STOCK_ERROR.getErrorMessage());
         }
+    }
+
+    private int getAvailableStock(Order order) {
+        if (productStore.findPromotionProduct(order)
+                .filter(product -> product.checkPromotionDuration(order))
+                .isPresent()) {
+            return productStore.getTotalStockByProductName(order);  // 프로모션과 일반 재고를 합산
+        }
+        return productStore.findNonPromotionProduct(order)
+                .map(Product::getProductStock)
+                .orElse(0);  // 프로모션 기간이 아닐 때는 일반 재고만 확인
     }
 
     private void calculateBonusItemCount(Product product, Order order) {
