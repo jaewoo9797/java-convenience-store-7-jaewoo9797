@@ -24,7 +24,7 @@ public class Order {
         try {
             this.orderCount = Integer.parseInt(orderCount);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(ErrorMessage.INPUT_ERROR_MESSAGE.getErrorMessage());
+            throw new IllegalArgumentException(ErrorMessage.ORDER_ERROR_MESSAGE.getErrorMessage());
         }
         this.createdDate = DateTimes.now().toLocalDate();
     }

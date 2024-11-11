@@ -30,8 +30,8 @@ public class OrderManager {
     }
 
     public void processOrder(Order order) {
-        checkStockAvailabilityAtOrderTime(order);
         Product product = checkOrderByProductName(order);
+        checkStockAvailabilityAtOrderTime(order);
         calculateBonusItemCount(product, order);
     }
 
@@ -156,13 +156,13 @@ public class OrderManager {
         return product.productStockCompareOrderQuantity(order.getOrderCount());
     }
 
-    // 주문 상품 이름으로 먼저 Product 객체 찾기
     private Product checkOrderByProductName(Order order) {
         return productStore.findPromotionProduct(order)
                 .orElseGet(() -> productStore.findNonPromotionProduct(order)
                         .orElseThrow(
                                 () -> new IllegalArgumentException(NON_EXIST_PRODUCT_ERROR_MESSAGE.getErrorMessage())));
     }
+    // 주문 상품 이름으로 먼저 Product 객체 찾기
 
     private Product findNonPromotionProduct(Order order) {
         return productStore.findNonPromotionProduct(order)

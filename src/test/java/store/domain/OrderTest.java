@@ -28,6 +28,6 @@ public class OrderTest {
     void 주문_생성_실패_테스트(String element) {
 
         assertThatIllegalArgumentException().isThrownBy(() -> new Order("사이다", element))
-                .withMessage(ErrorMessage.INPUT_ERROR_MESSAGE.getErrorMessage());
+                .withMessage(ErrorMessage.ORDER_ERROR_MESSAGE.getErrorMessage());
     }
 }

@@ -30,7 +30,7 @@ public class OutputView {
     }
 
     private static void printReceiptHeader() {
-        System.out.println("==============W 편의점================");
+        System.out.println("\n==============W 편의점================");
         System.out.printf("%s\t\t\t\t%s\t%s\n", "상품명", "수량", "금액");
     }
 
