@@ -40,7 +40,7 @@ public class OutputView {
             int orderCount = result.getOrderCount();
             int totalPrice = orderCount * result.getProductPrice();
 
-            System.out.printf("%s\t\t\t\t%d\t\t%,d원\n", productName, orderCount, totalPrice);
+            System.out.printf("%s\t\t\t\t%d\t\t%,d\n", productName, orderCount, totalPrice);
         }
     }
 
@@ -66,10 +66,10 @@ public class OutputView {
     private static void consolePrintReceiptFooter(int totalOrderCount, int totalAmount, int totalPromotionDiscount,
                                                   int membershipDiscount, int finalAmount) {
         System.out.println("======================================");
-        System.out.printf("총구매액\t\t\t%d\t\t%,d원\n", totalOrderCount, totalAmount);
-        System.out.printf("행사할인\t\t\t\t\t-%,d원\n", totalPromotionDiscount);
-        System.out.printf("멤버십할인\t\t\t\t\t-%,d원\n", membershipDiscount);
-        System.out.printf("내실돈\t\t\t\t\t\t%,d원\n\n", finalAmount);
+        System.out.printf("총구매액\t\t\t%d\t\t%,d\n", totalOrderCount, totalAmount);
+        System.out.printf("행사할인\t\t\t\t\t-%,d\n", totalPromotionDiscount);
+        System.out.printf("멤버십할인\t\t\t\t\t-%,d\n", membershipDiscount);
+        System.out.printf("내실돈\t\t\t\t\t\t%,d\n\n", finalAmount);
     }
 
     public static void printWelcomeGreeting() {
