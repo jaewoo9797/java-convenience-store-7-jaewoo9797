@@ -2,7 +2,6 @@ package store.domain;
 
 import static store.error.ErrorMessage.INSUFFICIENT_STOCK_ERROR;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import store.error.ErrorMessage;
 

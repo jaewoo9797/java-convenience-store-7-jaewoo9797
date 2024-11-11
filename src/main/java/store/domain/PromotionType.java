@@ -1,6 +1,5 @@
 package store.domain;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import store.error.ErrorMessage;

@@ -49,8 +49,4 @@ public class Order {
         this.orderCount -= decreaseCount;
     }
 
-
-    public void updateOrderCount(int adjustedOrderCount) {
-        this.orderCount = adjustedOrderCount;
-    }
 }
