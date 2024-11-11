@@ -31,7 +31,7 @@ public enum PromotionType {
     },
     FLASH_SALE("반짝할인",
             LocalDateTime.of(2024, 11, 1,0,0),
-            LocalDateTime.of(2024, 11, 3, 23, 59, 59),
+            LocalDateTime.of(2024, 11, 30, 23, 59, 59),
             2
     ) {
         @Override
