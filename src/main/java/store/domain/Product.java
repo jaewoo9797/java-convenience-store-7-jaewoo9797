@@ -46,14 +46,14 @@ public class Product {
 
     public void decreasePromoStock(int count) {
         if (productStock < count) {
-            throw new IllegalStateException(INSUFFICIENT_STOCK_ERROR.getErrorMessage());
+            throw new IllegalArgumentException(INSUFFICIENT_STOCK_ERROR.getErrorMessage());
         }
         productStock -= count;
     }
 
     public void decreaseNonPromoStock(int count) {
         if (productStock < count) {
-            throw new IllegalStateException(INSUFFICIENT_STOCK_ERROR.getErrorMessage());
+            throw new IllegalArgumentException(INSUFFICIENT_STOCK_ERROR.getErrorMessage());
         }
         productStock -= count;
     }
