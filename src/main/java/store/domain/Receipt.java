@@ -31,7 +31,6 @@ public class Receipt {
         }
     }
 
-    // 총 구매액과 행사할인 계산
     public void calculateTotals() {
         for (OrderResult orderResult : orderResults) {
             int orderTotal = orderResult.getOrderCount() * orderResult.getProductPrice();

@@ -51,13 +51,6 @@ public class Product {
         productStock -= count;
     }
 
-    public void decreaseNonPromoStock(int count) {
-        if (productStock < count) {
-            throw new IllegalArgumentException(INSUFFICIENT_STOCK_ERROR.getErrorMessage());
-        }
-        productStock -= count;
-    }
-
     @Override
     public String toString() {
         if (productStock == NON_STOCK) {

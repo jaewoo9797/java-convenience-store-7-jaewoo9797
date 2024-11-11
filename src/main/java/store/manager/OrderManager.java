@@ -21,10 +21,6 @@ public class OrderManager {
     private final ProductStore productStore;
     private final List<OrderResult> orderResultList = new ArrayList<>();
 
-    public void printOrderResultList() {
-        orderResultList.forEach(System.out::println);
-    }
-
     public OrderManager(ProductStore productStore) {
         this.productStore = productStore;
     }
@@ -60,9 +56,7 @@ public class OrderManager {
             handlePartialPromotionOrder(product, order, bonusItemCount);
             return;
         }
-        product.decreaseNonPromoStock(order.getOrderCount());
-        orderResultList.add(
-                new OrderResult(order, bonusItemCount, product.getProductPrice(), product.getPromotionType()));
+        processFullOrder(product, order, bonusItemCount);
     }
 
     private boolean isExactPromotionOrder(Product product, Order order) {
@@ -79,11 +73,7 @@ public class OrderManager {
     private void applyBonusItemAndReduceStock(Product product, Order order, int bonusItemCount) {
         bonusItemCount++;
         order.plusOrderCount();
-
-        product.decreasePromoStock(order.getOrderCount());
-
-        orderResultList.add(
-                new OrderResult(order, bonusItemCount, product.getProductPrice(), product.getPromotionType()));
+        processFullOrder(product, order, bonusItemCount);
     }
 
     private void handlePartialPromotionOrder(Product product, Order order, int bonusItemCount) {
@@ -131,27 +121,21 @@ public class OrderManager {
 
     private void finalizePartialOrder(Product product, Order order, int bonusItemCount, int promotionUnitCount) {
         order.decreaseOrderCount(promotionUnitCount);
-        product.decreasePromoStock(order.getOrderCount());
-        saveOrderResult(order, bonusItemCount, product);
+        processFullOrder(product, order, bonusItemCount);
     }
 
     private void finalizeFullOrder(Product product, Product nonPromotionProduct, Order order, int bonusItemCount,
                                    int promoStockUsed, int nonPromoStockUsed) {
         reduceStocks(product, nonPromotionProduct, promoStockUsed, nonPromoStockUsed);
-        saveOrderResult(order, bonusItemCount, product);
-    }
-
-    private void saveOrderResult(Order order, int bonusItemCount, Product product) {
         orderResultList.add(
                 new OrderResult(order, bonusItemCount, product.getProductPrice(), product.getPromotionType()));
     }
 
     private void reduceStocks(Product product, Product nonPromotionProduct, int promoStockUsed, int nonPromoStockUsed) {
         product.decreasePromoStock(promoStockUsed);
-        nonPromotionProduct.decreaseNonPromoStock(nonPromoStockUsed);
+        nonPromotionProduct.decreasePromoStock(nonPromoStockUsed);
     }
 
-    // Product객체 안에서 재고를 확인하고 비교한다.
     private boolean checkStockAvailability(Product product, Order order) {
         return product.productStockCompareOrderQuantity(order.getOrderCount());
     }
@@ -162,16 +146,11 @@ public class OrderManager {
                         .orElseThrow(
                                 () -> new IllegalArgumentException(NON_EXIST_PRODUCT_ERROR_MESSAGE.getErrorMessage())));
     }
-    // 주문 상품 이름으로 먼저 Product 객체 찾기
 
     private Product findNonPromotionProduct(Order order) {
         return productStore.findNonPromotionProduct(order)
                 .orElseThrow(() -> new IllegalArgumentException(
                         ErrorMessage.INPUT_ERROR_MESSAGE.getErrorMessage()));
-    }
-
-    public List<OrderResult> getOrderResultList() {
-        return orderResultList;
     }
 
     public void printAllProductInfo() {
