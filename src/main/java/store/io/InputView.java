@@ -10,7 +10,8 @@ import store.domain.Order;
 import store.domain.Product;
 
 public class InputView {
-    private static final String AGREEMENT_LETTER = "Y";
+    private static final String AGREEMENT_YES = "Y";
+    private static final String AGREEMENT_NO = "N";
     private static final String RESOURCE_ADRRESS = "src/main/resources/products.md";
     private static final String ORDER_INPUT_PATTERN = "^\\[[가-힣a-zA-Z0-9]+-\\d+\\](,\\[[가-힣a-zA-Z0-9]+-\\d+\\])*$";
 
@@ -38,7 +39,17 @@ public class InputView {
     }
 
     public static boolean confirmFromUser() {
-        return Console.readLine().trim().equalsIgnoreCase(AGREEMENT_LETTER);
+        while (true) {
+            String input = Console.readLine().trim().toUpperCase();
+
+            if (input.equals(AGREEMENT_YES)) {
+                return true;
+            }
+            if (input.equals(AGREEMENT_NO)) {
+                return false;
+            }
+            System.out.println("[ERROR] 잘못된 입력입니다. 다시 입력해 주세요.");
+        }
     }
 
     public static List<Order> inputOrderFromUser() {
@@ -74,7 +85,9 @@ public class InputView {
 
     public static boolean inputOrderMoreToUser() {
         System.out.println("감사합니다. 구매하고 싶은 다른 상품이 있나요? (Y/N)");
-        return confirmFromUser();
+        boolean result =  confirmFromUser();
+        System.out.println();
+        return result;
     }
 
 }
