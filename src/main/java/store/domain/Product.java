@@ -3,6 +3,7 @@ package store.domain;
 import static store.error.ErrorMessage.INSUFFICIENT_STOCK_ERROR;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import store.error.ErrorMessage;
 
 public class Product {
@@ -77,8 +78,8 @@ public class Product {
     }
 
     public boolean checkPromotionDuration(Order order) {
-        LocalDate orderDate = order.getCreatedDate();
-        return promotionType.isPromotionDuration(orderDate);
+        LocalDateTime orderDateTime = order.getCreatedDate();
+        return promotionType.isPromotionDuration(orderDateTime);
     }
 
     public int getPromotionUnitCount() {

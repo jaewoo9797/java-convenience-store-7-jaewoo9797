@@ -1,6 +1,7 @@
 package store.domain;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import store.error.ErrorMessage;
 
@@ -15,8 +16,8 @@ public enum PromotionType {
         }
     },
     CARBONATE_TWO_PLUS_ONE("탄산2+1",
-            LocalDate.of(2024, 1, 1),
-            LocalDate.of(2024, 12, 31),
+            LocalDateTime.of(2024, 1, 1,0,0),
+            LocalDateTime.of(2024, 12, 31, 23, 59, 59),
             3
     ) {
         @Override
@@ -30,8 +31,8 @@ public enum PromotionType {
         }
     },
     FLASH_SALE("반짝할인",
-            LocalDate.of(2024, 11, 1),
-            LocalDate.of(2024, 11, 30),
+            LocalDateTime.of(2024, 11, 1,0,0),
+            LocalDateTime.of(2024, 11, 3, 23, 59, 59),
             2
     ) {
         @Override
@@ -45,8 +46,8 @@ public enum PromotionType {
         }
     },
     MD_RECOMMENDATION("MD추천상품",
-            LocalDate.of(2024, 1, 1),
-            LocalDate.of(2024, 12, 31),
+            LocalDateTime.of(2024, 1, 1,0,0),
+            LocalDateTime.of(2024, 12, 31, 23, 59, 59),
             2
     ) {
         @Override
@@ -59,17 +60,16 @@ public enum PromotionType {
             return orderCount % 2 == 1;
         }
     },
-
     ;
     private final String promotionName;
-    private final LocalDate startDate;
-    private final LocalDate endDate;
+    private final LocalDateTime startDateTime;
+    private final LocalDateTime endDateTime;
     private final int promotionUnitCount;
 
-    private PromotionType(String promotionName, LocalDate startDate, LocalDate endDate, int promotionUnitCount) {
+    private PromotionType(String promotionName, LocalDateTime startDateTime, LocalDateTime endDateTime, int promotionUnitCount) {
         this.promotionName = promotionName;
-        this.startDate = startDate;
-        this.endDate = endDate;
+        this.startDateTime = startDateTime;
+        this.endDateTime = endDateTime;
         this.promotionUnitCount = promotionUnitCount;
     }
 
@@ -97,12 +97,12 @@ public enum PromotionType {
         return false;
     }
 
-    public boolean isPromotionDuration(LocalDate orderTime) {
+    public boolean isPromotionDuration(LocalDateTime orderTime) {
         if (NONE == this) {
             return false;
         }
-        return (orderTime.isEqual(startDate) || orderTime.isAfter(startDate)) &&
-                (orderTime.isEqual(endDate) || orderTime.isBefore(endDate));
+        return (orderTime.isEqual(startDateTime) || orderTime.isAfter(startDateTime)) &&
+                (orderTime.isEqual(endDateTime) || orderTime.isBefore(endDateTime));
     }
 
     public int getPromotionUnitCount() {

@@ -1,15 +1,15 @@
 package store.domain;
 
 import camp.nextstep.edu.missionutils.DateTimes;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import store.error.ErrorMessage;
 
 public class Order {
-    private String ProductName;
+    private final String ProductName;
     private int orderCount;
-    private LocalDate createdDate;
+    private final LocalDateTime createdDate;
 
-    public Order(String productName, String orderCount, LocalDate createdDate) {
+    public Order(String productName, String orderCount, LocalDateTime createdDate) {
         this.ProductName = productName;
         try {
             this.orderCount = Integer.parseInt(orderCount);
@@ -26,7 +26,7 @@ public class Order {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException(ErrorMessage.ORDER_ERROR_MESSAGE.getErrorMessage());
         }
-        this.createdDate = DateTimes.now().toLocalDate();
+        this.createdDate = DateTimes.now();
     }
 
     public String getProductName() {
@@ -37,7 +37,7 @@ public class Order {
         return orderCount;
     }
 
-    public LocalDate getCreatedDate() {
+    public LocalDateTime getCreatedDate() {
         return createdDate;
     }
 
